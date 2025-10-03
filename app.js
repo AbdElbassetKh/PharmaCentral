@@ -1027,6 +1027,9 @@ class FeedManager {
     console.log(`🎉 Successfully loaded ${articles.length} articles from ${successCount}/${this.feeds.length} RSS feeds`);
     console.log(`📊 Feed Status: ${successCount} successful, ${failCount} failed`);
     
+    // Update feed status in UI
+    this.updateFeedStatus(successCount, failCount);
+    
     // Show error if too many feeds failed
     if (failCount > this.feeds.length / 2) {
       const errorMessage = document.getElementById('errorMessage');
@@ -1442,6 +1445,30 @@ class FeedManager {
       console.warn('Failed to load from cache:', error);
     }
     return false;
+  }
+
+  updateFeedStatus(successCount, failCount) {
+    const feedStatusElement = document.getElementById('feedStatus');
+    if (!feedStatusElement) return;
+
+    const totalFeeds = this.feeds.length;
+    const statusText = currentLanguage === 'ar' 
+      ? `تم تحميل ${successCount} من ${totalFeeds} مصدر بنجاح` 
+      : `${successCount} of ${totalFeeds} feeds loaded successfully`;
+
+    if (failCount > 0) {
+      const failText = currentLanguage === 'ar' 
+        ? `، فشل ${failCount} مصدر` 
+        : `, ${failCount} failed`;
+      statusText += failText;
+    }
+
+    feedStatusElement.innerHTML = `
+      <div class="status-item">
+        <span class="status-indicator ${failCount === 0 ? 'success' : failCount < totalFeeds / 2 ? 'warning' : 'error'}"></span>
+        <span>${statusText}</span>
+      </div>
+    `;
   }
 
   startBackgroundUpdates() {
@@ -1907,7 +1934,13 @@ function showLoadingSkeleton() {
 
 // Hide Loading Skeleton
 function hideLoadingSkeleton() {
-  // Loading skeleton will be replaced by actual content
+  // Remove skeleton loading elements
+  const skeletonCards = document.querySelectorAll('.skeleton-card');
+  skeletonCards.forEach(card => card.remove());
+  
+  // Hide filter loading skeletons
+  const filterLoading = document.querySelectorAll('.filter-loading');
+  filterLoading.forEach(loading => loading.classList.add('hidden'));
 }
 
 // Populate Filter Sections
@@ -2491,6 +2524,9 @@ function updateUI() {
       formatDateEnglish(feedManager.lastUpdate);
     lastUpdated.textContent = lastUpdateText + formatted;
   }
+  
+  // Update results count
+  updateResultsCount();
   
   updateTextContent();
   updatePlaceholders();
