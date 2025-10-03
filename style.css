@@ -1748,25 +1748,27 @@ html[dir="rtl"] .news-card-meta {
   }
 }
 
-/* RTL Specific Styles */
+/* ========================================
+   SELECTIVE RTL IMPLEMENTATION
+   ======================================== */
+
+/* Base RTL Support - Only for text content and navigation */
 html[dir="rtl"] {
   text-align: right;
+  font-family: 'Noto Sans Arabic', var(--font-family-base);
 }
 
-html[dir="rtl"] .search-container {
-  direction: rtl;
-}
+/* ========================================
+   ELEMENTS TO REVERSE (Navigation & Text)
+   ======================================== */
 
+/* Navigation elements - reverse layout */
 html[dir="rtl"] .navbar-actions {
   flex-direction: row-reverse;
 }
 
-html[dir="rtl"] .news-card-content {
-  text-align: right;
-}
-
-html[dir="rtl"] .featured-content {
-  text-align: right;
+html[dir="rtl"] .nav-links {
+  flex-direction: row-reverse;
 }
 
 html[dir="rtl"] .footer-bottom {
@@ -1775,6 +1777,15 @@ html[dir="rtl"] .footer-bottom {
 
 html[dir="rtl"] .footer-links {
   flex-direction: row-reverse;
+}
+
+/* Text content alignment - reverse for RTL reading */
+html[dir="rtl"] .news-card-content {
+  text-align: right;
+}
+
+html[dir="rtl"] .featured-content {
+  text-align: right;
 }
 
 html[dir="rtl"] .section-header {
@@ -1791,12 +1802,6 @@ html[dir="rtl"] .footer-section {
 
 html[dir="rtl"] .footer-section p {
   text-align: right;
-}
-
-html[dir="rtl"] select.form-control {
-  background-position: left var(--space-12) center;
-  padding-left: var(--space-32);
-  padding-right: var(--space-12);
 }
 
 html[dir="rtl"] .navbar-brand .logo {
@@ -1827,8 +1832,130 @@ html[dir="rtl"] .featured-excerpt {
   text-align: right;
 }
 
+html[dir="rtl"] .source-links {
+  text-align: right;
+}
+
+html[dir="rtl"] .update-info {
+  text-align: right;
+}
+
+/* Form elements - reverse for RTL */
+html[dir="rtl"] .search-container {
+  direction: rtl;
+}
+
+html[dir="rtl"] select.form-control {
+  background-position: left var(--space-12) center;
+  padding-left: var(--space-32);
+  padding-right: var(--space-12);
+}
+
+/* Filter elements - reverse layout */
+html[dir="rtl"] .filter-item {
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+}
+
+html[dir="rtl"] .filter-label {
+  text-align: right;
+}
+
+html[dir="rtl"] .filter-checkbox.checked::after {
+  left: auto;
+  right: 1px;
+}
+
+/* ========================================
+   ELEMENTS TO PRESERVE (Directional Icons & Numbers)
+   ======================================== */
+
+/* Preserve directional elements - DO NOT reverse */
+html[dir="rtl"] .btn::before {
+  /* Keep button shimmer effect direction */
+  left: -100%;
+}
+
+html[dir="rtl"] .btn:hover::before {
+  left: 100%;
+}
+
+/* Preserve arrow icons in select dropdowns */
+html[dir="rtl"] select.form-control {
+  background-image: var(--select-caret-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  html[dir="rtl"] select.form-control {
+    background-image: var(--select-caret-dark);
+  }
+}
+
+/* Preserve loading spinner direction */
+html[dir="rtl"] .loading-spinner-small {
+  animation: spin 1s linear infinite;
+}
+
+html[dir="rtl"] .loading-spinner-small::after {
+  animation: spin 1.5s linear infinite reverse;
+}
+
+/* Preserve hamburger menu icon */
+html[dir="rtl"] .hamburger::before {
+  top: -6px;
+}
+
+html[dir="rtl"] .hamburger::after {
+  bottom: -6px;
+}
+
+/* Preserve status indicators */
+html[dir="rtl"] .status-indicator {
+  /* Keep circular shape and position */
+}
+
+/* Preserve checkmark in checkboxes */
+html[dir="rtl"] .filter-checkbox.checked::after {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  right: 1px; /* Only change position, not the checkmark itself */
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* ========================================
+   F-PATTERN LAYOUT OPTIMIZATION
+   ======================================== */
+
+/* Optimize content flow for RTL F-pattern reading */
+html[dir="rtl"] .layout {
+  direction: rtl;
+}
+
+html[dir="rtl"] .sidebar,
+html[dir="rtl"] .news-content {
+  direction: rtl;
+}
+
+/* Featured carousel - reverse for RTL reading pattern */
+html[dir="rtl"] .featured-carousel {
+  direction: rtl;
+}
+
+/* Loading content - reverse for RTL */
+html[dir="rtl"] .loading-content {
+  flex-direction: row-reverse;
+}
+
+/* ========================================
+   ELEMENTS TO KEEP CENTERED
+   ======================================== */
+
+/* Keep these elements centered regardless of direction */
 html[dir="rtl"] .results-info {
-  text-align: left;
+  text-align: left; /* Keep counter on left for consistency */
 }
 
 html[dir="rtl"] .load-more-container {
@@ -1840,24 +1967,193 @@ html[dir="rtl"] .no-articles {
   text-align: center;
 }
 
-html[dir="rtl"] .source-links {
-  text-align: right;
-}
-
-html[dir="rtl"] .update-info {
-  text-align: right;
-}
-
 html[dir="rtl"] .error-message {
   text-align: center;
 }
 
-html[dir="rtl"] .loading-content {
-  flex-direction: row-reverse;
+/* ========================================
+   ARABIC TYPOGRAPHY ENHANCEMENTS
+   ======================================== */
+
+/* Enhanced Arabic font support */
+html[dir="rtl"] {
+  font-family: 'Noto Sans Arabic', 'Tajawal', 'Cairo', var(--font-family-base);
+  line-height: 1.8; /* Slightly increased for Arabic readability */
+  letter-spacing: 0.02em; /* Better character spacing for Arabic */
 }
 
-html[dir="rtl"] .featured-carousel {
-  direction: rtl;
+/* Arabic text rendering optimizations */
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] h4,
+html[dir="rtl"] h5,
+html[dir="rtl"] h6 {
+  font-family: 'Noto Sans Arabic', 'Tajawal', 'Cairo', sans-serif;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+html[dir="rtl"] p,
+html[dir="rtl"] .news-card-excerpt,
+html[dir="rtl"] .featured-excerpt {
+  line-height: 1.8;
+  text-align: justify; /* Better for Arabic text blocks */
+}
+
+/* ========================================
+   RESPONSIVE RTL ADJUSTMENTS
+   ======================================== */
+
+/* Mobile RTL adjustments */
+@media (max-width: 768px) {
+  html[dir="rtl"] .nav-links {
+    flex-direction: column; /* Keep vertical on mobile */
+  }
+  
+  html[dir="rtl"] .featured-sidebar {
+    flex-direction: column; /* Keep vertical on mobile */
+  }
+  
+  html[dir="rtl"] .featured-sidebar-skeleton {
+    flex-direction: column;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY IMPROVEMENTS FOR RTL
+   ======================================== */
+
+/* Ensure proper focus indicators for RTL */
+html[dir="rtl"] *:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* RTL-specific ARIA improvements */
+html[dir="rtl"] [aria-label] {
+  /* Ensure screen readers understand RTL context */
+}
+
+/* ========================================
+   ADDITIONAL RTL ENHANCEMENTS
+   ======================================== */
+
+/* Preserve company logos and brand elements */
+html[dir="rtl"] .logo,
+html[dir="rtl"] .navbar-brand {
+  /* Keep logo direction unchanged */
+  direction: ltr;
+  text-align: left;
+}
+
+/* Preserve numbers and dates in their original format */
+html[dir="rtl"] .news-card-date,
+html[dir="rtl"] .featured-item-meta span:last-child,
+html[dir="rtl"] .filter-count {
+  direction: ltr;
+  text-align: left;
+  display: inline-block;
+}
+
+/* Preserve URLs and technical content */
+html[dir="rtl"] .source-links a,
+html[dir="rtl"] .news-card-source {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Preserve video play buttons and media controls */
+html[dir="rtl"] .play-button,
+html[dir="rtl"] .media-controls {
+  direction: ltr;
+  transform: none;
+}
+
+/* Preserve progress bars and loading indicators */
+html[dir="rtl"] .progress-bar,
+html[dir="rtl"] .loading-spinner {
+  direction: ltr;
+}
+
+/* Preserve social media icons and external links */
+html[dir="rtl"] .social-icons,
+html[dir="rtl"] .external-link {
+  direction: ltr;
+}
+
+/* ========================================
+   RTL MODE CLASSES FOR JAVASCRIPT CONTROL
+   ======================================== */
+
+.rtl-mode {
+  /* Additional RTL mode styling can be added here */
+}
+
+.rtl-mode .preserve-direction {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.rtl-mode .preserve-numbers {
+  direction: ltr !important;
+  unicode-bidi: embed;
+}
+
+/* ========================================
+   IMPROVED ARABIC TYPOGRAPHY
+   ======================================== */
+
+/* Better Arabic text rendering */
+html[dir="rtl"] {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Arabic text justification improvements */
+html[dir="rtl"] .news-card-excerpt,
+html[dir="rtl"] .featured-excerpt,
+html[dir="rtl"] .footer-section p {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+}
+
+/* Better line breaks for Arabic text */
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] h4,
+html[dir="rtl"] h5,
+html[dir="rtl"] h6 {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* ========================================
+   RTL SPECIFIC ANIMATIONS
+   ======================================== */
+
+/* Preserve animation directions for directional elements */
+html[dir="rtl"] .btn::before {
+  animation: shimmer-ltr 2s infinite;
+}
+
+@keyframes shimmer-ltr {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Loading spinner should always rotate clockwise */
+html[dir="rtl"] .loading-spinner-small {
+  animation: spin-clockwise 1s linear infinite;
+}
+
+@keyframes spin-clockwise {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Enhanced Mobile Responsive Design */

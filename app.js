@@ -1788,14 +1788,18 @@ function handleGlobalKeydown(e) {
   }
 }
 
-// Language Toggle Function with Rate Limiting
+// Language Toggle Function with Selective RTL Implementation
 async function toggleLanguage() {
   currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
   const html = document.documentElement;
   
   if (currentLanguage === 'ar') {
+    // Apply RTL with selective reversal
     html.setAttribute('dir', 'rtl');
     html.setAttribute('lang', 'ar');
+    html.setAttribute('data-rtl-active', 'true');
+    
+    console.log('🔄 Switching to Arabic with selective RTL implementation...');
     
     // Only translate currently visible articles (displayedArticles)
     const articlesToTranslate = displayedArticles.filter(a => !a.title_ar || !a.excerpt_ar);
@@ -1855,9 +1859,16 @@ async function toggleLanguage() {
       console.log('✅ All visible articles already translated.');
     }
   } else {
+    // Switch back to LTR
     html.setAttribute('dir', 'ltr');
     html.setAttribute('lang', 'en');
+    html.removeAttribute('data-rtl-active');
+    
+    console.log('🔄 Switching to English (LTR)...');
   }
+  
+  // Apply selective RTL styling
+  applySelectiveRTLStyling();
   
   updateTextContent();
   updatePlaceholders();
@@ -1872,6 +1883,58 @@ async function toggleLanguage() {
   renderFeaturedNews();
   renderNewsGrid();
   updateResultsCount();
+}
+
+// Apply selective RTL styling based on current language
+function applySelectiveRTLStyling() {
+  const html = document.documentElement;
+  const isRTL = currentLanguage === 'ar';
+  
+  // Add/remove RTL-specific classes for better control
+  if (isRTL) {
+    html.classList.add('rtl-mode');
+    document.body.classList.add('rtl-mode');
+  } else {
+    html.classList.remove('rtl-mode');
+    document.body.classList.remove('rtl-mode');
+  }
+  
+  // Update specific elements that need manual RTL handling
+  updateDirectionalElements();
+}
+
+// Update directional elements to preserve their original direction
+function updateDirectionalElements() {
+  // Preserve button shimmer effects
+  const buttons = document.querySelectorAll('.btn');
+  buttons.forEach(btn => {
+    if (currentLanguage === 'ar') {
+      btn.style.setProperty('--shimmer-direction', 'left-to-right');
+    } else {
+      btn.style.setProperty('--shimmer-direction', 'left-to-right');
+    }
+  });
+  
+  // Preserve loading spinners
+  const spinners = document.querySelectorAll('.loading-spinner-small, .spinner');
+  spinners.forEach(spinner => {
+    if (currentLanguage === 'ar') {
+      spinner.style.animationDirection = 'normal';
+    } else {
+      spinner.style.animationDirection = 'normal';
+    }
+  });
+  
+  // Preserve checkmark positions in checkboxes
+  const checkboxes = document.querySelectorAll('.filter-checkbox.checked');
+  checkboxes.forEach(checkbox => {
+    const checkmark = checkbox.querySelector('::after');
+    if (checkmark && currentLanguage === 'ar') {
+      checkbox.style.setProperty('--checkmark-position', 'right');
+    } else {
+      checkbox.style.setProperty('--checkmark-position', 'left');
+    }
+  });
 }
 
 // Mobile Menu Toggle
@@ -2662,6 +2725,9 @@ window.addEventListener('load', () => {
     });
   }
   
+  // Initialize RTL support
+  initializeRTLSupport();
+  
   // Initialize text content based on current language
   updateTextContent();
   updatePlaceholders();
@@ -2672,3 +2738,41 @@ window.addEventListener('load', () => {
     console.log('🔄 Re-updated text content after page load');
   }, 100);
 });
+
+// Initialize RTL support and detection
+function initializeRTLSupport() {
+  // Detect user's preferred language
+  const userLang = navigator.language || navigator.userLanguage;
+  const isArabicPreferred = userLang.startsWith('ar') || userLang.includes('ar');
+  
+  console.log('🌐 User language detected:', userLang);
+  console.log('🔤 Arabic preferred:', isArabicPreferred);
+  
+  // Set initial language based on user preference
+  if (isArabicPreferred && currentLanguage === 'en') {
+    console.log('🔄 Auto-switching to Arabic based on user preference');
+    // Don't auto-switch to avoid disrupting user experience
+    // toggleLanguage();
+  }
+  
+  // Apply initial RTL styling
+  applySelectiveRTLStyling();
+  
+  // Add RTL-specific event listeners
+  setupRTLEventListeners();
+}
+
+// Setup RTL-specific event listeners
+function setupRTLEventListeners() {
+  // Listen for language changes
+  document.addEventListener('languageChanged', (event) => {
+    console.log('🔄 Language changed event received:', event.detail);
+    applySelectiveRTLStyling();
+  });
+  
+  // Listen for RTL mode changes
+  document.addEventListener('rtlModeChanged', (event) => {
+    console.log('🔄 RTL mode changed event received:', event.detail);
+    updateDirectionalElements();
+  });
+}
