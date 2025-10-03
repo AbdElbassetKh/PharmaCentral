@@ -999,6 +999,9 @@ class FeedManager {
     const loadingSpinner = document.getElementById('loadingSpinner');
     loadingSpinner?.classList.remove('hidden');
     
+    // Update feed status to show loading
+    this.updateFeedStatusLoading();
+    
     console.log('Starting RSS feed fetch...');
     const articles = [];
     const feedPromises = this.feeds.map(feed => this.fetchFeedWithRetry(feed));
@@ -1447,12 +1450,28 @@ class FeedManager {
     return false;
   }
 
+  updateFeedStatusLoading() {
+    const feedStatusElement = document.getElementById('feedStatus');
+    if (!feedStatusElement) return;
+
+    const loadingText = currentLanguage === 'ar' 
+      ? 'جاري تحميل المصادر...' 
+      : 'Loading feeds...';
+
+    feedStatusElement.innerHTML = `
+      <div class="status-item">
+        <span class="status-indicator loading"></span>
+        <span>${loadingText}</span>
+      </div>
+    `;
+  }
+
   updateFeedStatus(successCount, failCount) {
     const feedStatusElement = document.getElementById('feedStatus');
     if (!feedStatusElement) return;
 
     const totalFeeds = this.feeds.length;
-    const statusText = currentLanguage === 'ar' 
+    let statusText = currentLanguage === 'ar' 
       ? `تم تحميل ${successCount} من ${totalFeeds} مصدر بنجاح` 
       : `${successCount} of ${totalFeeds} feeds loaded successfully`;
 
@@ -1563,7 +1582,7 @@ let activeFilters = {
 // Global instances
 let feedManager;
 let searchInput, searchResults, categoryFilters, sourceFilters, dateFilter, sortFilter;
-let newsGrid, featuredNews, loadMoreBtn, resultsCount, lastUpdated, footerSources;
+let newsGrid, featuredNews, loadMoreBtn, resultsCount, lastUpdated, footerSources, feedStatus;
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', async function() {
@@ -1591,6 +1610,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     await feedManager.fetchAllFeeds();
   } else {
     console.log('✅ Using cached data, articles count:', feedManager.getArticles().length);
+    // Update feed status for cached data
+    if (feedManager.updateFeedStatus) {
+      feedManager.updateFeedStatus(feedManager.feeds.length, 0);
+    }
   }
   
   // Set up the application with real data
@@ -1636,6 +1659,7 @@ function initializeElements() {
   resultsCount = document.getElementById('resultsCount');
   lastUpdated = document.getElementById('lastUpdated');
   footerSources = document.getElementById('footerSources');
+  feedStatus = document.getElementById('feedStatus');
 }
 
 // Setup Event Listeners
@@ -2504,6 +2528,7 @@ function openArticle(articleId) {
 function updateResultsCount() {
   if (resultsCount) {
     const count = filteredArticles.length;
+    console.log('🔄 Updating results count:', count);
     if (currentLanguage === 'ar') {
       const articlesText = count === 1 ? 'مقالة' : count === 2 ? 'مقالتان' : count <= 10 ? 'مقالات' : 'مقالة';
       resultsCount.textContent = `تم العثور على ${count} ${articlesText}`;
@@ -2511,11 +2536,16 @@ function updateResultsCount() {
       const articlesText = count === 1 ? 'article' : 'articles';
       resultsCount.textContent = `${count} ${articlesText} found`;
     }
+    console.log('✅ Results count updated:', resultsCount.textContent);
+  } else {
+    console.error('❌ resultsCount element not found');
   }
 }
 
 // Update UI Elements
 function updateUI() {
+  console.log('🔄 Updating UI elements...');
+  
   // Update last updated timestamp
   if (lastUpdated && feedManager && feedManager.lastUpdate) {
     const lastUpdateText = currentLanguage === 'ar' ? 'آخر تحديث: ' : 'Last updated: ';
@@ -2523,6 +2553,9 @@ function updateUI() {
       formatDateArabic(feedManager.lastUpdate) : 
       formatDateEnglish(feedManager.lastUpdate);
     lastUpdated.textContent = lastUpdateText + formatted;
+    console.log('✅ Last updated timestamp updated:', lastUpdated.textContent);
+  } else {
+    console.log('⚠️ Last updated not updated - missing elements or data');
   }
   
   // Update results count
@@ -2530,6 +2563,8 @@ function updateUI() {
   
   updateTextContent();
   updatePlaceholders();
+  
+  console.log('✅ UI elements updated');
 }
 
 // Get Localized Text
