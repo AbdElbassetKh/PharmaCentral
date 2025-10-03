@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <meta name="theme-color" content="#21808d">
+    <title>PharmaCentral - مجمع الأخبار الدوائية</title>
+    <meta name="description" content="Real-time pharmaceutical news aggregator from trusted RSS sources worldwide. Get latest pharma news in English and Arabic.">
+    <meta name="keywords" content="pharmaceutical news, pharma, medicine, healthcare, drug development, clinical trials, FDA, بيوفارما, أخبار دوائية">
+    <meta name="author" content="PharmaCentral">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://api.mymemory.translated.net https://api.allorigins.win https://corsproxy.io https://api.rss2json.com https://translate.googleapis.com https://lingva.ml; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://r2cdn.perplexity.ai; img-src 'self' data: https:; connect-src 'self' https://api.mymemory.translated.net https://api.allorigins.win https://corsproxy.io https://api.rss2json.com https://translate.googleapis.com https://lingva.ml; frame-src 'none'; object-src 'none'; base-uri 'self';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="PharmaCentral - Pharmaceutical News Aggregator">
+    <meta property="og:description" content="Real-time pharmaceutical news from trusted sources worldwide">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:locale:alternate" content="ar_SA">
+    
+    <!-- Performance optimization -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://api.mymemory.translated.net">
+    <link rel="dns-prefetch" href="https://api.allorigins.win">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Skip Links for Accessibility -->
+    <div class="skip-links">
+        <a href="#main-content" class="skip-link" data-en="Skip to main content" data-ar="انتقل إلى المحتوى الرئيسي">Skip to main content</a>
+        <a href="#filters" class="skip-link" data-en="Skip to filters" data-ar="انتقل إلى المرشحات">Skip to filters</a>
+        <a href="#news-grid" class="skip-link" data-en="Skip to news articles" data-ar="انتقل إلى مقالات الأخبار">Skip to news articles</a>
+    </div>
+    
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="navbar-brand">
+                    <h1 class="logo">
+                        <span class="logo-text" data-en="PharmaCentral" data-ar="المركز الدوائي">PharmaCentral</span>
+                    </h1>
+                </div>
+                
+                <div class="navbar-actions">
+                    <div class="search-container">
+                        <input type="text" 
+                               class="search-input form-control" 
+                               placeholder="Search pharmaceutical news..."
+                               data-placeholder-en="Search pharmaceutical news..."
+                               data-placeholder-ar="البحث في الأخبار الدوائية..."
+                               aria-label="Search pharmaceutical news"
+                               aria-describedby="search-help"
+                               role="searchbox"
+                               autocomplete="off">
+                        <div class="search-results hidden" 
+                             role="listbox" 
+                             aria-label="Search results"
+                             aria-live="polite"
+                             aria-expanded="false"></div>
+                        <div id="search-help" class="sr-only">
+                            <span data-en="Type to search through pharmaceutical news articles" data-ar="اكتب للبحث في مقالات الأخبار الدوائية">Type to search through pharmaceutical news articles</span>
+                        </div>
+                    </div>
+                    
+                    <button class="language-toggle btn btn--secondary" onclick="toggleLanguage()" aria-label="Toggle language">
+                        <span data-en="العربية" data-ar="English">العربية</span>
+                    </button>
+                    
+                    <button class="mobile-menu-toggle btn btn--secondary" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu" aria-expanded="false">
+                        <span class="hamburger"></span>
+                    </button>
+                </div>
+            </nav>
+            
+            <nav class="main-nav">
+                <ul class="nav-links">
+                    <li><a href="#" class="nav-link active" data-en="Home" data-ar="الرئيسية">Home</a></li>
+                    <li><a href="#" class="nav-link" data-en="Categories" data-ar="الفئات">Categories</a></li>
+                    <li><a href="#" class="nav-link" data-en="Sources" data-ar="المصادر">Sources</a></li>
+                    <li><a href="#refresh" class="nav-link" onclick="refreshFeeds()" data-en="Refresh" data-ar="تحديث">Refresh</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Loading Banner -->
+    <div class="loading-banner hidden" id="loadingBanner">
+        <div class="container">
+            <div class="loading-content">
+                <div class="loading-spinner-small"></div>
+                <span data-en="Loading latest pharmaceutical news..." data-ar="جاري تحميل آخر الأخبار الدوائية...">Loading latest pharmaceutical news...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <div class="container">
+            <div class="layout">
+                <!-- Sidebar -->
+                <aside class="sidebar" id="filters" role="complementary" aria-label="Filters and controls">
+                    <div class="filter-section">
+                        <h3 data-en="Filter by Category" data-ar="تصفية حسب الفئة">Filter by Category</h3>
+                        <div class="filter-group" id="categoryFilters" role="group" aria-label="Category filters">
+                            <div class="filter-loading">
+                                <div class="skeleton skeleton-filter"></div>
+                                <div class="skeleton skeleton-filter"></div>
+                                <div class="skeleton skeleton-filter"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h3 data-en="Filter by Source" data-ar="تصفية حسب المصدر">Filter by Source</h3>
+                        <div class="filter-group" id="sourceFilters" role="group" aria-label="Source filters">
+                            <div class="filter-loading">
+                                <div class="skeleton skeleton-filter"></div>
+                                <div class="skeleton skeleton-filter"></div>
+                                <div class="skeleton skeleton-filter"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h3 data-en="Date Range" data-ar="النطاق الزمني">Date Range</h3>
+                        <div class="date-filter">
+                            <select class="form-control" id="dateFilter" aria-label="Date range filter">
+                                <option value="all" data-en="All Time" data-ar="كل الأوقات">All Time</option>
+                                <option value="today" data-en="Today" data-ar="اليوم">Today</option>
+                                <option value="week" data-en="This Week" data-ar="هذا الأسبوع">This Week</option>
+                                <option value="month" data-en="This Month" data-ar="هذا الشهر">This Month</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h3 data-en="Sort By" data-ar="ترتيب حسب">Sort By</h3>
+                        <select class="form-control" id="sortFilter" aria-label="Sort order">
+                            <option value="newest" data-en="Newest First" data-ar="الأحدث أولاً">Newest First</option>
+                            <option value="oldest" data-en="Oldest First" data-ar="الأقدم أولاً">Oldest First</option>
+                            <option value="source" data-en="By Source" data-ar="حسب المصدر">By Source</option>
+                        </select>
+                    </div>
+
+                    <!-- Feed Status -->
+                    <div class="filter-section">
+                        <h3 data-en="Feed Status" data-ar="حالة المصادر">Feed Status</h3>
+                        <div class="feed-status" id="feedStatus">
+                            <div class="status-item">
+                                <span class="status-indicator loading"></span>
+                                <span data-en="Loading feeds..." data-ar="جاري تحميل المصادر...">Loading feeds...</span>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- News Content -->
+                <section class="news-content">
+                    <!-- Error Message -->
+                    <div class="error-message hidden" id="errorMessage">
+                        <div class="error-content">
+                            <h3 data-en="Connection Error" data-ar="خطأ في الاتصال">Connection Error</h3>
+                            <p data-en="Unable to load some news feeds. Showing cached articles." data-ar="تعذر تحميل بعض مصادر الأخبار. عرض المقالات المحفوظة.">Unable to load some news feeds. Showing cached articles.</p>
+                            <button class="btn btn--primary" onclick="refreshFeeds()" data-en="Try Again" data-ar="حاول مرة أخرى">Try Again</button>
+                        </div>
+                    </div>
+
+                    <!-- Featured News -->
+                    <!-- تم حذف قسم Featured News بناءً على طلب المستخدم -->
+
+                    <!-- Latest News -->
+                    <div class="latest-news">
+                        <div class="section-header">
+                            <h2 data-en="Latest News" data-ar="آخر الأخبار">Latest News</h2>
+                            <div class="results-info">
+                                <span id="resultsCount" data-en="Loading articles..." data-ar="جاري تحميل المقالات...">Loading articles...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="news-grid" id="news-grid" role="feed" aria-label="News articles" aria-busy="false">
+                            <!-- News loading skeleton -->
+                            <div class="skeleton-card">
+                                <div class="skeleton skeleton-image"></div>
+                                <div class="skeleton-content">
+                                    <div class="skeleton skeleton-text skeleton-category"></div>
+                                    <div class="skeleton skeleton-text skeleton-title"></div>
+                                    <div class="skeleton skeleton-text"></div>
+                                    <div class="skeleton skeleton-text"></div>
+                                    <div class="skeleton skeleton-text skeleton-meta"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-card">
+                                <div class="skeleton skeleton-image"></div>
+                                <div class="skeleton-content">
+                                    <div class="skeleton skeleton-text skeleton-category"></div>
+                                    <div class="skeleton skeleton-text skeleton-title"></div>
+                                    <div class="skeleton skeleton-text"></div>
+                                    <div class="skeleton skeleton-text"></div>
+                                    <div class="skeleton skeleton-text skeleton-meta"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-card">
+                                <div class="skeleton skeleton-image"></div>
+                                <div class="skeleton-content">
+                                    <div class="skeleton skeleton-text skeleton-category"></div>
+                                    <div class="skeleton skeleton-text skeleton-title"></div>
+                                    <div class="skeleton skeleton-text"></div>
+                                    <div class="skeleton skeleton-text"></div>
+                                    <div class="skeleton skeleton-text skeleton-meta"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-card">
+                                <div class="skeleton skeleton-image"></div>
+                                <div class="skeleton-content">
+                                    <div class="skeleton skeleton-text skeleton-category"></div>
+                                    <div class="skeleton skeleton-text skeleton-title"></div>
+                                    <div class="skeleton skeleton-text"></div>
+                                    <div class="skeleton skeleton-text"></div>
+                                    <div class="skeleton skeleton-text skeleton-meta"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-card">
+                                <div class="skeleton skeleton-image"></div>
+                                <div class="skeleton-content">
+                                    <div class="skeleton skeleton-text skeleton-category"></div>
+                                    <div class="skeleton skeleton-text skeleton-title"></div>
+                                    <div class="skeleton skeleton-text"></div>
+                                    <div class="skeleton skeleton-text"></div>
+                                    <div class="skeleton skeleton-text skeleton-meta"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-card">
+                                <div class="skeleton skeleton-image"></div>
+                                <div class="skeleton-content">
+                                    <div class="skeleton skeleton-text skeleton-category"></div>
+                                    <div class="skeleton skeleton-text skeleton-title"></div>
+                                    <div class="skeleton skeleton-text"></div>
+                                    <div class="skeleton skeleton-text"></div>
+                                    <div class="skeleton skeleton-text skeleton-meta"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="load-more-container">
+                            <button class="btn btn--secondary load-more-btn hidden" id="loadMoreBtn" data-en="Load More Articles" data-ar="تحميل المزيد من المقالات">Load More Articles</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4 data-en="About PharmaCentral" data-ar="حول المركز الدوائي">About PharmaCentral</h4>
+                    <p data-en="Real-time pharmaceutical news aggregator that fetches the latest updates from trusted RSS sources worldwide. Stay informed with breaking news, clinical trials, regulatory updates, and market analysis." 
+                       data-ar="مجمع الأخبار الدوائية في الوقت الفعلي الذي يجلب آخر التحديثات من مصادر RSS الموثوقة حول العالم. ابق على اطلاع بالأخبار العاجلة والتجارب السريرية والتحديثات التنظيمية وتحليل السوق.">
+                        Real-time pharmaceutical news aggregator that fetches the latest updates from trusted RSS sources worldwide.
+                    </p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 data-en="RSS Sources" data-ar="مصادر RSS">RSS Sources</h4>
+                    <ul class="source-links" id="footerSources">
+                        <li><a href="https://www.fiercepharma.com/rss/xml" target="_blank" rel="noopener">FiercePharma</a></li>
+                        <li><a href="https://www.biopharmadive.com/feeds/news/" target="_blank" rel="noopener">BioPharma Dive</a></li>
+                        <li><a href="https://www.statnews.com/category/pharma/feed/" target="_blank" rel="noopener">STAT Pharma</a></li>
+                        <li><a href="https://www.pharmatimes.com/feed" target="_blank" rel="noopener">PharmaTimes</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4 data-en="Last Updated" data-ar="آخر تحديث">Last Updated</h4>
+                    <p id="lastUpdated" data-en="Loading..." data-ar="جاري التحميل...">Loading...</p>
+                    <div class="update-info">
+                        <small data-en="Feeds update automatically every 30 minutes" data-ar="تحديث المصادر تلقائياً كل 30 دقيقة">Feeds update automatically every 30 minutes</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 PharmaCentral. 
+                   <span data-en="Real-time pharmaceutical news aggregator." data-ar="مجمع الأخبار الدوائية في الوقت الفعلي.">Real-time pharmaceutical news aggregator.</span>
+                </p>
+                <div class="footer-links">
+                    <button onclick="refreshFeeds()" class="footer-link" data-en="Refresh Feeds" data-ar="تحديث المصادر">Refresh Feeds</button>
+                    <button onclick="clearCache()" class="footer-link" data-en="Clear Cache" data-ar="مسح التخزين المؤقت">Clear Cache</button>
+                    <button onclick="clearTranslationCache()" class="footer-link" data-en="Clear Translation Cache" data-ar="مسح ذاكرة الترجمة">Clear Translation Cache</button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Global Loading Spinner -->
+    <div class="loading-spinner hidden" id="loadingSpinner">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <p data-en="Loading pharmaceutical news..." data-ar="جاري تحميل الأخبار الدوائية...">Loading pharmaceutical news...</p>
+        </div>
+    </div>
+
+    <!-- Offline Indicator -->
+    <div class="offline-indicator hidden" id="offlineIndicator">
+        <div class="offline-content">
+            <span data-en="You are offline. Showing cached articles." data-ar="أنت غير متصل. عرض المقالات المحفوظة.">You are offline. Showing cached articles.</span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Global utility functions accessible from HTML
+        function refreshFeeds() {
+            if (window.feedManager) {
+                showGlobalLoading();
+                window.feedManager.fetchAllFeeds().then(() => {
+                    if (window.app) {
+                        window.app.refreshContent();
+                    }
+                    hideGlobalLoading();
+                }).catch(error => {
+                    console.error('Failed to refresh feeds:', error);
+                    hideGlobalLoading();
+                    showErrorMessage();
+                });
+            }
+        }
+
+        function clearCache() {
+            try {
+                localStorage.removeItem('pharma_news_cache');
+                localStorage.removeItem('translation_cache');
+                
+                // Show success toast
+                if (window.toastManager) {
+                    const message = currentLanguage === 'ar' ? 'تم مسح التخزين المؤقت بنجاح' : 'Cache cleared successfully';
+                    window.toastManager.success(message);
+                } else {
+                    alert(currentLanguage === 'ar' ? 'تم مسح التخزين المؤقت' : 'Cache cleared');
+                }
+                
+                setTimeout(() => location.reload(), 1000);
+            } catch (error) {
+                console.error('Failed to clear cache:', error);
+                if (window.toastManager) {
+                    const message = currentLanguage === 'ar' ? 'فشل في مسح التخزين المؤقت' : 'Failed to clear cache';
+                    window.toastManager.error(message);
+                }
+            }
+        }
+
+        function showGlobalLoading() {
+            const loadingBanner = document.getElementById('loadingBanner');
+            loadingBanner?.classList.remove('hidden');
+        }
+
+        function hideGlobalLoading() {
+            const loadingBanner = document.getElementById('loadingBanner');
+            loadingBanner?.classList.add('hidden');
+        }
+
+        function showErrorMessage() {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage?.classList.remove('hidden');
+        }
+
+        function hideErrorMessage() {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage?.classList.add('hidden');
+        }
+
+        // Network status detection
+        window.addEventListener('online', () => {
+            document.getElementById('offlineIndicator')?.classList.add('hidden');
+            refreshFeeds();
+        });
+
+        window.addEventListener('offline', () => {
+            document.getElementById('offlineIndicator')?.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
